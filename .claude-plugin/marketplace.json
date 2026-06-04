@@ -1,0 +1,16 @@
+{
+  "name": "bmtaka-tools",
+  "owner": {
+    "name": "bmtaka",
+    "email": "taka@noahbase.com"
+  },
+  "description": "Personal Claude Code plugins",
+  "plugins": [
+    {
+      "name": "adr-keeper",
+      "source": "./",
+      "description": "Per-project ADR management with auto-save hooks",
+      "version": "1.0.0"
+    }
+  ]
+}
