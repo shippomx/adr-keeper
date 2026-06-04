@@ -189,7 +189,8 @@ UserPromptSubmit hook 触发
       ▼
 prompt-counter.sh 执行：
   1. is-project-dir.sh 判定 → 不是则退出
-  2. 读 .claude/.adr-counter，自增写回
+  2. 读 ~/.claude/adr-keeper/counters/<basename>-<cksum>，自增写回
+     （2026-06 修订：原为 <project>/.claude/.adr-counter，因污染项目 git status 外置）
   3. N % 10 == 0 ？
      否 → 静默退出（绝大部分时候走这条）
      是 → 输出 additionalContext：
@@ -314,10 +315,11 @@ Claude 匹配 adr-keeper skill → 调用 adr list
 | 0007 | 改用 Postgres 内置缓存 | Accepted | 2026-05-22 | 架构, 数据模型 |
 ```
 
-**计数器文件**（`<project>/.claude/.adr-counter`）：
+**计数器文件**（`~/.claude/adr-keeper/counters/<basename>-<cksum>`）：
 
 - 内容：单行整数，UserPromptSubmit 累计次数
-- 由 prompt-counter.sh 维护
+- 由 prompt-counter.sh（`_common.sh` 中 `adr_counter_file`）维护
+- 2026-06 修订：原位置为 `<project>/.claude/.adr-counter`，因在每个项目里产生 untracked 文件而外置到 `$HOME`；旧文件可手动删除，无迁移逻辑
 
 **锁文件**（`<project>/docs/decisions/.lock`）：
 

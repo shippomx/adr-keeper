@@ -19,11 +19,7 @@ INSTR=$(cat <<'EOF'
 <system-reminder>
 PreCompact: 上下文即将被压缩。若本次对话中产生过设计决策（被采纳的方案、被否决的备选、达成的架构共识），请立即扫描并以 ADR 形式保存到 ./docs/decisions/。
 
-判定标准（满足任一即写）：
-1. 用户明确说「就这么定了」「选方案 X」「确认」「OK」等表达
-2. 在多个方案中选择并给出理由
-3. 引入或废弃了重要技术依赖
-4. 数据模型或核心接口的关键定义
+__ADR_CRITERIA__
 
 操作步骤（每个新决策一遍）：
 1. 调用 `bash "__ADR_SCRIPTS__/new-adr.sh" "<short-slug>" "<完整标题>"`，记下返回的文件路径
@@ -34,14 +30,15 @@ PreCompact: 上下文即将被压缩。若本次对话中产生过设计决策�
 </system-reminder>
 EOF
 )
-# Substitute the real scripts dir at runtime so the plugin works wherever it is installed.
+# Substitute the real scripts dir / shared criteria at runtime.
 INSTR=${INSTR//__ADR_SCRIPTS__/$HERE}
+INSTR=${INSTR//__ADR_CRITERIA__/$(adr_decision_criteria)}
 
 if command -v python3 >/dev/null 2>&1; then
     python3 -c '
 import json, sys
 instr = sys.stdin.read()
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreCompact", "additionalContext": instr}}))
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreCompact", "additionalContext": instr}}, ensure_ascii=False))
 ' <<< "$INSTR"
 else
     ESCAPED=$(printf '%s' "$INSTR" | awk 'BEGIN{ORS="\\n"} {gsub(/\\/,"\\\\"); gsub(/"/,"\\\""); print}')

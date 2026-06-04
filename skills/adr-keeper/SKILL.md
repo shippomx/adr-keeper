@@ -1,6 +1,6 @@
 ---
 name: adr-keeper
-description: Manage per-project ADR (Architecture Decision Record) files in docs/decisions/. Use when the user mentions ADR, 决策记录, 查看历史决策, 新建决策, 搜决策, supersede, deprecate, or asks to see/edit content under docs/decisions.
+description: Use when the user mentions ADR, 决策记录, 查看历史决策, 新建决策, 搜决策, supersede, deprecate, asks to see/edit content under docs/decisions, or confirms a design decision in conversation (就这么定了, 选方案 X, 确认用这个, settles on an architecture/tech choice).
 ---
 
 # ADR Keeper
@@ -59,10 +59,15 @@ User triggers: "supersede 0003 with 0007", "0003 已经被 0007 替换".
 ```bash
 sed -i.bak 's/^- \*\*Status\*\*:.*$/- **Status**: Superseded by 0007/' docs/decisions/0003-*.md
 rm docs/decisions/0003-*.md.bak
+grep -H '^- \*\*Status\*\*: Superseded by 0007' docs/decisions/0003-*.md || echo "STATUS UPDATE FAILED"
 bash "<skill-dir>/scripts/update-index.sh"
 ```
 
 (Substitute the actual old/new IDs each call.)
+
+If the grep prints `STATUS UPDATE FAILED`, do NOT report success — the Status line didn't match the expected format; open the file with Read and fix the Status line with Edit instead.
+
+Then add a back-link in the NEW ADR (0007): in its `## References` section, add a line `- Supersedes [[0003]]` (use Edit; create the section if missing). The link must exist in both directions.
 
 ### Mark an ADR as deprecated
 
@@ -71,8 +76,11 @@ User triggers: "deprecate 0005", "0005 这个决策不用了".
 ```bash
 sed -i.bak 's/^- \*\*Status\*\*:.*$/- **Status**: Deprecated/' docs/decisions/0005-*.md
 rm docs/decisions/0005-*.md.bak
+grep -H '^- \*\*Status\*\*: Deprecated' docs/decisions/0005-*.md || echo "STATUS UPDATE FAILED"
 bash "<skill-dir>/scripts/update-index.sh"
 ```
+
+If the grep prints `STATUS UPDATE FAILED`, do NOT report success — open the file with Read and fix the Status line with Edit instead.
 
 Optionally append a `## Reason for deprecation` section with the user's stated reason.
 
@@ -102,4 +110,4 @@ Cross-reference between ADRs using `[[NNNN]]` syntax.
 
 ## Hook coordination
 
-When the PreCompact hook fires, Claude will be instructed to scan the conversation and write ADRs. The user does not need to invoke this skill manually for normal use; this skill exists for queries and manual fixes.
+**Write at decision time, not at compaction time.** The moment the user settles a decision in conversation (「就这么定了」「选方案 X」「确认」), create the ADR immediately via the steps above. The PreCompact hook (scan conversation, dump unsaved decisions) and the every-10-prompts reminder are backstops for decisions that slipped through — a session that ends without compaction never fires them, so anything not written at decision time can be lost.

@@ -19,6 +19,8 @@ adr_assert_contains "$OUT" "PreCompact" "mentions PreCompact"
 adr_assert_contains "$OUT" "new-adr.sh" "references new-adr.sh"
 adr_assert_contains "$OUT" "update-index.sh" "references update-index.sh"
 adr_assert_contains "$OUT" "docs/decisions" "references docs/decisions path"
+adr_assert_contains "$OUT" "判定标准" "includes shared decision criteria"
+adr_assert_contains "$OUT" "就这么定了" "criteria mention user confirmation phrases"
 adr_cleanup_tmp "$PROJ"
 
 adr_test_summary

@@ -6,12 +6,16 @@ Claude Code 插件：按项目管理 ADR（Architecture Decision Record），文
 
 | 组件 | 作用 |
 |---|---|
-| **SessionStart hook** | 项目存在 `docs/decisions/INDEX.md` 时，自动把决策索引注入会话上下文 |
-| **PreCompact hook** | 上下文压缩前，提示 Claude 扫描本次对话并把新决策落盘为 ADR |
-| **UserPromptSubmit hook** | 每 10 条用户消息提醒一次保存未记录的决策 |
+| **SessionStart hook** | 项目存在 `docs/decisions/INDEX.md` 时，自动把决策索引注入会话上下文（超过 30 条时只注入最近 20 条 + 总数提示），并附带「决策落定即写」常驻指令 |
+| **PreCompact hook** | 上下文压缩前，提示 Claude 扫描本次对话并把新决策落盘为 ADR（兜底通道） |
+| **UserPromptSubmit hook** | 每 10 条用户消息提醒一次保存未记录的决策（兜底通道，判定标准与 PreCompact 一致） |
 | **adr-keeper skill** | 手动操作入口：list / view / search / create / supersede / deprecate |
 
 所有 hook 自带项目检测（git / package.json / pom.xml / go.mod 等标记）与黑名单（`$HOME`、`~/.claude`、`/tmp`、Desktop/Downloads/Documents 等），不在项目目录里不会有任何动作。
+
+主通道是「决策落定即写」：用户在会话里拍板（"就这么定了" / "选方案 X"）时 Claude 立即落盘 ADR；PreCompact 与每 10 条消息的提醒只是兜底——会话不经压缩直接结束时它们不会触发。
+
+提醒计数器存放在 `~/.claude/adr-keeper/counters/`（不写入项目目录，不污染 `git status`）。
 
 ## 安装（其它机器）
 
@@ -80,3 +84,5 @@ bash skills/adr-keeper/tests/run-all.sh
 3. 按上文安装插件
 
 项目里已有的 `docs/decisions/` 数据不受影响。
+
+旧版本曾在每个项目里写 `<project>/.claude/.adr-counter`（现已外置到 `~/.claude/adr-keeper/counters/`），各项目里的旧 counter 文件可直接删除。

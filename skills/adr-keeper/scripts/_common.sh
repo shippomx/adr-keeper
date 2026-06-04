@@ -45,6 +45,29 @@ adr_is_blacklisted() {
     return 1
 }
 
+# Per-project prompt-counter file, stored OUTSIDE the project so we never
+# pollute the user's working tree (untracked .claude/ in git status).
+# Keyed by basename + path checksum to stay unique and human-recognizable.
+# Usage: adr_counter_file <project-root>
+adr_counter_file() {
+    local root="$1"
+    local sum
+    sum=$(printf '%s' "$root" | cksum | awk '{print $1}')
+    echo "$HOME/.claude/adr-keeper/counters/$(basename "$root")-$sum"
+}
+
+# Decision criteria shared verbatim by precompact.sh and prompt-counter.sh,
+# so both reminders apply the same bar for "this is worth an ADR".
+adr_decision_criteria() {
+    cat <<'EOF'
+判定标准（满足任一即写）：
+1. 用户明确说「就这么定了」「选方案 X」「确认」「OK」等表达
+2. 在多个方案中选择并给出理由
+3. 引入或废弃了重要技术依赖
+4. 数据模型或核心接口的关键定义
+EOF
+}
+
 # Atomic mkdir-based lock. Caller is responsible for releasing.
 # Usage: adr_acquire_lock <lockdir> [max_wait_seconds]
 # Returns 0 on success, 1 on timeout.
