@@ -1,13 +1,12 @@
 {
   "name": "adr-keeper",
   "displayName": "ADR Keeper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Per-project ADR (Architecture Decision Record) management: hooks auto-save decisions before compaction, skill provides manual list/view/search/create/supersede operations on docs/decisions/.",
   "author": {
     "name": "bmtaka",
     "email": "taka@noahbase.com"
   },
   "license": "MIT",
-  "keywords": ["adr", "architecture", "decisions", "decision-records"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["adr", "architecture", "decisions", "decision-records"]
 }

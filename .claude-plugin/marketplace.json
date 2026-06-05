@@ -10,7 +10,7 @@
       "name": "adr-keeper",
       "source": "./",
       "description": "Per-project ADR management with auto-save hooks",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }
